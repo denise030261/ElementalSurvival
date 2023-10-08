@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" addBOMForNewFiles="with BOM under Windows, with no BOM otherwise">
+    <file url="file://$PROJECT_DIR$/Source/TrueFPSTutorial/Private/Character/TrueFPSAnimInstance.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/TrueFPSTutorial/Private/Character/TrueFPSCharacter.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/TrueFPSTutorial/Private/Weapons/Weapon.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/TrueFPSTutorial/Public/Character/TrueFPSAnimInstance.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/TrueFPSTutorial/Public/Character/TrueFPSCharacter.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/TrueFPSTutorial/Public/Weapons/Weapon.h" charset="x-windows-949" />
+  </component>
+</project>
