@@ -4,7 +4,8 @@
 #include "..\..\Public\Character\TrueFPSCharacter.h"
 #include <Runtime/Engine/Public/Net/UnrealNetwork.h>
 #include "Weapons/Weapon.h"
-#include "Camera/CAmeraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 ATrueFPSCharacter::ATrueFPSCharacter()
 {
@@ -23,7 +24,9 @@ ATrueFPSCharacter::ATrueFPSCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->bUsePawnControlRotation = true; 
-	Camera->SetupAttachment(GetMesh(), FName("head")); 
+	Camera->SetupAttachment(GetMesh(), FName("head"));
+
+	jumping = false;
 }
 
 void ATrueFPSCharacter::BeginPlay()
@@ -115,6 +118,11 @@ void ATrueFPSCharacter::Tick(const float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimingTimeline.TickTimeline(DeltaTime); // Aiming하는 시간
+
+	if (jumping)
+	{
+		Jump();
+	}
 }
 
 void ATrueFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -126,6 +134,8 @@ void ATrueFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 	PlayerInputComponent->BindAction(FName("NextWeapon"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::NextWeapon);
 	PlayerInputComponent->BindAction(FName("LastWeapon"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::LastWeapon);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATrueFPSCharacter::CheckJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATrueFPSCharacter::CheckJump);
 
 	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ATrueFPSCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ATrueFPSCharacter::MoveRight);
@@ -235,5 +245,17 @@ void ATrueFPSCharacter::LookUp(const float Value)
 void ATrueFPSCharacter::LookRight(const float Value)
 {
 	AddControllerYawInput(Value);
+}
+
+void ATrueFPSCharacter::CheckJump()
+{
+	if (jumping)
+	{
+		jumping = false;
+	}
+	else
+	{
+		jumping = true;
+	}
 }
 

@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character")
 		virtual void EquipWeapon(const int32 Index);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		bool jumping;
+
 protected:
 	UFUNCTION()
 		virtual void OnRep_CurrentWeapon(const class AWeapon* OldWeapon);
@@ -101,4 +104,5 @@ protected:
 	void MoveRight(const float Value);
 	void LookUp(const float Value);
 	void LookRight(const float Value);
+	void CheckJump();
 };
