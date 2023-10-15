@@ -51,11 +51,11 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "State")
 		int32 CurrentIndex = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		bool IsJump = false;
+
 	UFUNCTION(BlueprintCallable, Category = "Character")
 		virtual void EquipWeapon(const int32 Index);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
-		bool jumping;
 
 protected:
 	UFUNCTION()
@@ -104,5 +104,5 @@ protected:
 	void MoveRight(const float Value);
 	void LookUp(const float Value);
 	void LookRight(const float Value);
-	void CheckJump();
+	void Jumping();
 };

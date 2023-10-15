@@ -25,8 +25,6 @@ ATrueFPSCharacter::ATrueFPSCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->bUsePawnControlRotation = true; 
 	Camera->SetupAttachment(GetMesh(), FName("head"));
-
-	jumping = false;
 }
 
 void ATrueFPSCharacter::BeginPlay()
@@ -119,7 +117,7 @@ void ATrueFPSCharacter::Tick(const float DeltaTime)
 
 	AimingTimeline.TickTimeline(DeltaTime); // Aiming하는 시간
 
-	if (jumping)
+	if (IsJump)
 	{
 		Jump();
 	}
@@ -131,11 +129,11 @@ void ATrueFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction(FName("Aim"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::StartAiming); //Aiming을 위한 입력
 	PlayerInputComponent->BindAction(FName("Aim"), EInputEvent::IE_Released, this, &ATrueFPSCharacter::ReverseAiming); // Aiming 취소를 위한 입력
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATrueFPSCharacter::Jumping);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATrueFPSCharacter::Jumping);
 	
 	PlayerInputComponent->BindAction(FName("NextWeapon"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::NextWeapon);
 	PlayerInputComponent->BindAction(FName("LastWeapon"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::LastWeapon);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATrueFPSCharacter::CheckJump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATrueFPSCharacter::CheckJump);
 
 	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ATrueFPSCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ATrueFPSCharacter::MoveRight);
@@ -247,15 +245,15 @@ void ATrueFPSCharacter::LookRight(const float Value)
 	AddControllerYawInput(Value);
 }
 
-void ATrueFPSCharacter::CheckJump()
+void ATrueFPSCharacter::Jumping()
 {
-	if (jumping)
+	if (IsJump)
 	{
-		jumping = false;
+		IsJump = false;
 	}
 	else
 	{
-		jumping = true;
+		IsJump = true;
 	}
 }
 
