@@ -2,12 +2,15 @@
 
 
 #include "Weapons/Weapon.h"
+#include "Weapons/GunAnimInstance.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 AWeapon::AWeapon()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	// 틱으로 bool 함수를 통해서 연사를 조절한다.
 
 	SetReplicates(true);
 
@@ -25,6 +28,105 @@ void AWeapon::BeginPlay()
 
 	if(!CurrentOwner)
 		Mesh->SetVisibility(false);
+}
+
+void AWeapon::Tick(const float DeltaTime)
+{
+	if (CurrentBullet > 0)
+	{
+		bShoot = true;
+	}
+	else
+	{
+		bShoot = false;
+	}
+}
+
+void AWeapon::StartShooting()
+{
+	UE_LOG(LogTemp, Log, TEXT("Hello"));
+	if (bShoot)
+	{
+		CurrentBullet--;
+		UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentBullet);
+
+		if (FireAnimation)
+		{
+			Mesh->PlayAnimation(FireAnimation, false);
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AWeapon::Shooting, ShootDelay, true);
+		}
+
+		FHitResult Hit;
+		FVector ShotDirection;
+		bool IsTarget = GunTrace(Hit, ShotDirection);
+
+		if (IsTarget)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
+		}
+	}
+}
+
+void AWeapon::Shooting()
+{
+	if (bShoot)
+	{
+		CurrentBullet--;
+		UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentBullet);
+
+		Mesh->PlayAnimation(FireAnimation, false);
+
+		FHitResult Hit;
+		FVector ShotDirection;
+		bool IsTarget = GunTrace(Hit, ShotDirection);
+
+		if (IsTarget)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
+		}
+	}
+
+}
+
+void AWeapon::StopShooting()
+{
+	UE_LOG(LogTemp, Log, TEXT("StopShoot"));
+	if (FireAnimation)
+	{
+		GetWorld()->GetTimerManager().PauseTimer(TimerHandle);
+	}
+}
+
+void AWeapon::Reloading()
+{
+	CurrentBullet = MaxBullet;
+	Mesh->PlayAnimation(ReloadGunAnim, false);
+}
+
+AController* AWeapon::GetOwnerController() const
+{
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn == nullptr)
+		return nullptr;
+	return  OwnerPawn->GetController();
+}
+
+bool AWeapon::GunTrace(FHitResult& Hit, FVector& ShotDirection)
+{
+	AController* OwnerController = GetOwnerController();
+	if (OwnerController == nullptr)
+		return false;
+
+	FVector Location;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(Location, Rotation);
+	ShotDirection = -Rotation.Vector();
+
+	FVector End = Location + Rotation.Vector() * MaxRange;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+	return  GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
 }
 
 

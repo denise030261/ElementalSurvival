@@ -13,6 +13,7 @@ UTrueFPSAnimInstance::UTrueFPSAnimInstance()
 
 void UTrueFPSAnimInstance::NativeBeginPlay()
 {
+	PlayerController = GetWorld()->GetFirstPlayerController();
 	Super::NativeBeginPlay();
 }
 
@@ -36,6 +37,55 @@ void UTrueFPSAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	CalculateWeaponSway(DeltaTime);
 
 	LastRotation = CameraTransform.Rotator(); //변환 이후
+
+	if (IsSpaceInputPressed())
+	{
+		IsJumpAni = true;
+	}
+	else
+	{
+		IsJumpAni = false; 
+	}
+
+	if (IsRInputPressed())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Pressed R"));
+		IsReload = true;
+	}
+	else 
+	{
+		IsReload = false;
+	}
+}
+
+bool UTrueFPSAnimInstance::IsSpaceInputPressed()
+{
+	if (PlayerController)
+	{
+		// 스페이스바 입력을 확인합니다.
+		UPlayerInput* PlayerInput = PlayerController->PlayerInput;
+		if (PlayerInput)
+		{
+			return PlayerInput->IsPressed(FKey("SpaceBar"));
+		}
+	}
+
+	return false;
+}
+
+bool UTrueFPSAnimInstance::IsRInputPressed()
+{
+	if (PlayerController)
+	{
+		// 스페이스바 입력을 확인합니다.
+		UPlayerInput* PlayerInput = PlayerController->PlayerInput;
+		if (PlayerInput)
+		{
+			return PlayerInput->IsPressed(FKey("R"));
+		}
+	}
+
+	return false;
 }
 
 void UTrueFPSAnimInstance::CurrentWeaponChanged(AWeapon* NewWeapon, const AWeapon* OldWeapon)

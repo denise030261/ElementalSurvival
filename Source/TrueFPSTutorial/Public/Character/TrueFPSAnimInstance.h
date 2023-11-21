@@ -29,6 +29,12 @@ protected:
 
 	virtual void SetIKTransforms(); 
 
+	bool IsSpaceInputPressed();
+	bool IsRInputPressed();
+
+	UPROPERTY(BlueprintReadWrite, Category = "Anim")
+	APlayerController* PlayerController;
+
 public:
 	UPROPERTY(BlueprintReadWrite, Category="Anim")
 	class ATrueFPSCharacter* Character;
@@ -42,11 +48,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category="Anim")
 	FIKProperties IKProperties;
 
-
 	UPROPERTY(BlueprintReadOnly, Category="Anim")
 	FRotator LastRotation; //변환 이후
 
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category="Anim")
 	FTransform CameraTransform;
 
@@ -67,4 +71,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category="Anim")
 	FRotator AccumulativeRotationInterp; //변환 이후
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+	bool IsJumpAni = false; // 걷는 속도
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+	bool IsReload = false; // 걷는 속도
 };

@@ -5,6 +5,8 @@
 #include <Runtime/Engine/Public/Net/UnrealNetwork.h>
 #include "Weapons/Weapon.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Math/UnrealMathUtility.h"
 #include "Camera/CameraComponent.h"
 
 ATrueFPSCharacter::ATrueFPSCharacter()
@@ -25,6 +27,8 @@ ATrueFPSCharacter::ATrueFPSCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->bUsePawnControlRotation = true; 
 	Camera->SetupAttachment(GetMesh(), FName("head"));
+
+	FireEnd = false;
 }
 
 void ATrueFPSCharacter::BeginPlay()
@@ -119,7 +123,41 @@ void ATrueFPSCharacter::Tick(const float DeltaTime)
 
 	if (IsJump)
 	{
-		Jump();
+		if (IsCrouch)
+		{
+			Crouching();
+		} // 앉은 상태이면 원래 상태로 돌아가서 점프하기
+		else
+		{
+			Jump();
+		}
+		//Jump(); 
+	} // 점프 함수와 동시에 점프 애니메이션 시작
+
+	if (IsRun)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	} 
+	else if (!IsRun)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	}
+
+	if (FireEnd)
+	{
+		GetController()->SetControlRotation(FRotator(
+			FMath::FInterpTo(GetControlRotation().Pitch, CurrentPitch - ReboundMovement, DeltaTime, 1),
+			GetControlRotation().Yaw,
+			GetControlRotation().Roll));
+
+		UE_LOG(LogTemp, Log, TEXT("Current Pitch %f"), CurrentPitch);
+		UE_LOG(LogTemp, Log, TEXT("Target Pitch %f"), CurrentPitch - ReboundMovement);
+
+		if (abs(GetControlRotation().Pitch - (CurrentPitch - ReboundMovement)) <= 1)
+		{
+			UE_LOG(LogTemp, Log, TEXT("End"));
+			FireEnd = false;
+		}
 	}
 }
 
@@ -131,6 +169,11 @@ void ATrueFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(FName("Aim"), EInputEvent::IE_Released, this, &ATrueFPSCharacter::ReverseAiming); // Aiming 취소를 위한 입력
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATrueFPSCharacter::Jumping);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATrueFPSCharacter::Jumping);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ATrueFPSCharacter::Crouching);
+	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ATrueFPSCharacter::Running);
+	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &ATrueFPSCharacter::StartShooting);
+	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &ATrueFPSCharacter::StopShooting);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ATrueFPSCharacter::Reloading);
 	
 	PlayerInputComponent->BindAction(FName("NextWeapon"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::NextWeapon);
 	PlayerInputComponent->BindAction(FName("LastWeapon"), EInputEvent::IE_Pressed, this, &ATrueFPSCharacter::LastWeapon);
@@ -245,6 +288,11 @@ void ATrueFPSCharacter::LookRight(const float Value)
 	AddControllerYawInput(Value);
 }
 
+void ATrueFPSCharacter::Reloading()
+{
+	CurrentWeapon->Reloading();
+}
+
 void ATrueFPSCharacter::Jumping()
 {
 	if (IsJump)
@@ -256,4 +304,71 @@ void ATrueFPSCharacter::Jumping()
 		IsJump = true;
 	}
 }
+
+void ATrueFPSCharacter::Crouching()
+{
+	if (IsCrouch)
+	{
+		UnCrouch();
+		IsCrouch = false;
+	}
+	else if(!IsCrouch)
+	{
+		Crouch();
+		IsCrouch = true;
+	}
+}
+
+void ATrueFPSCharacter::Running()
+{
+	if (IsRun)
+	{
+		IsRun = false;
+	}
+	else
+	{
+		IsRun = true;
+	}
+}
+
+void ATrueFPSCharacter::StartShooting()
+{
+	ReboundMovement = 0;
+	if (CurrentWeapon->bShoot)
+	{
+		FireEnd = false;
+		CurrentWeapon->StartShooting();
+		UE_LOG(LogTemp, Log, TEXT("%f"), GetControlRotation().Pitch);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ATrueFPSCharacter::CameraShake, CurrentWeapon->ShootDelay, true);
+	}
+	// 총 다 쐈을 때의 행동은 추후에 결정
+}
+
+void ATrueFPSCharacter::StopShooting()
+{
+	CurrentPitch = GetControlRotation().Pitch;
+	CurrentWeapon->StopShooting();
+	GetWorld()->GetTimerManager().PauseTimer(TimerHandle);
+	if (ReboundMovement==0)
+	{
+		FireEnd = false;
+	}
+	else
+	{
+		FireEnd = true;
+	}
+}
+
+void ATrueFPSCharacter::CameraShake()
+{
+	if (ShootCameraShakeClass && CurrentWeapon->CurrentBullet > 0)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(ShootCameraShakeClass);
+		AddControllerPitchInput(-CurrentWeapon->Rebound);
+		ReboundMovement += CurrentWeapon->Rebound;
+	}
+}
+
+
+
 

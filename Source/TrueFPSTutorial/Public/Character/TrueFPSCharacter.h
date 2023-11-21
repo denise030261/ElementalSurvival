@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Camera/CameraShakeBase.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "TrueFPSCharacter.generated.h"
@@ -54,8 +55,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		bool IsJump = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		bool IsCrouch = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		bool IsRun = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		bool IsShoot = false;
+
 	UFUNCTION(BlueprintCallable, Category = "Character")
 		virtual void EquipWeapon(const int32 Index);
+
+	UPROPERTY(EditAnywhere, Category="Camera")
+	TSubclassOf<class UCameraShakeBase> ShootCameraShakeClass;
 
 protected:
 	UFUNCTION()
@@ -104,5 +117,17 @@ protected:
 	void MoveRight(const float Value);
 	void LookUp(const float Value);
 	void LookRight(const float Value);
+	void Reloading();
 	void Jumping();
+	void Crouching();
+	void Running();
+	void StartShooting();
+	void StopShooting();
+	void CameraShake();
+
+private:
+	bool FireEnd; // ÃÑÀ» ´Ù ½ú´ÂÁö
+	float ReboundMovement = 0; // ¾ó¸¶³ª ¹Ýµ¿ÀÌ ÀÖ¾ú´ÂÁö
+	float CurrentPitch; // ÃÑ ´Ù ½úÀ» ¶§ Pitch À§Ä¡
+	FTimerHandle TimerHandle; // ÃÑ µô·¹ÀÌ
 };
