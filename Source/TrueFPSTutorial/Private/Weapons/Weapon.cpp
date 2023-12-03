@@ -2,7 +2,6 @@
 
 
 #include "Weapons/Weapon.h"
-#include "Weapons/GunAnimInstance.h"
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values
@@ -19,6 +18,9 @@ AWeapon::AWeapon()
 
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Root);
+
+	RemainingTime = 0;
+	IsWeaponDelay = false;
 }
 
 // Called when the game starts or when spawned
@@ -42,10 +44,9 @@ void AWeapon::Tick(const float DeltaTime)
 	}
 }
 
-void AWeapon::StartShooting()
+void AWeapon::Shooting()
 {
-	UE_LOG(LogTemp, Log, TEXT("Hello"));
-	if (bShoot)
+	if (bShoot && !IsWeaponDelay)
 	{
 		CurrentBullet--;
 		UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentBullet);
@@ -56,51 +57,48 @@ void AWeapon::StartShooting()
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AWeapon::Shooting, ShootDelay, true);
 		}
 
-		FHitResult Hit;
-		FVector ShotDirection;
-		bool IsTarget = GunTrace(Hit, ShotDirection);
-
-		if (IsTarget)
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
-		}
-	}
-}
-
-void AWeapon::Shooting()
-{
-	if (bShoot)
-	{
-		CurrentBullet--;
-		UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentBullet);
-
-		Mesh->PlayAnimation(FireAnimation, false);
-
-		FHitResult Hit;
-		FVector ShotDirection;
-		bool IsTarget = GunTrace(Hit, ShotDirection);
-
-		if (IsTarget)
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
-		}
+		TraceTarget();
 	}
 
 }
 
 void AWeapon::StopShooting()
 {
-	UE_LOG(LogTemp, Log, TEXT("StopShoot"));
-	if (FireAnimation)
+	if (!IsWeaponDelay)
 	{
-		GetWorld()->GetTimerManager().PauseTimer(TimerHandle);
+		IsWeaponDelay = true;
+		if (FireAnimation)
+		{
+			GetWorld()->GetTimerManager().PauseTimer(TimerHandle);
+			RemainingTime = GetWorldTimerManager().GetTimerRemaining(TimerHandle);
+
+			FTimerHandle DelayTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, this, &AWeapon::Delaying, RemainingTime, false);
+		}
 	}
+}
+
+void AWeapon::Delaying()
+{
+	IsWeaponDelay = false;
 }
 
 void AWeapon::Reloading()
 {
 	CurrentBullet = MaxBullet;
 	Mesh->PlayAnimation(ReloadGunAnim, false);
+}
+
+void AWeapon::TraceTarget()
+{
+	FHitResult Hit;
+	FVector ShotDirection;
+	bool IsTarget = GunTrace(Hit, ShotDirection);
+
+	if (IsTarget)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
+	}
 }
 
 AController* AWeapon::GetOwnerController() const

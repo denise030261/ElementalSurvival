@@ -73,8 +73,8 @@ public:
 	FRotator AccumulativeRotationInterp; //변환 이후
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
-	bool IsJumpAni = false; // 걷는 속도
+	bool IsJumpAni = false; // 점프 애니메이션 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
-	bool IsReload = false; // 걷는 속도
+	bool IsReload = false; // 리로드 여부
 };

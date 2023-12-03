@@ -49,7 +49,6 @@ void UTrueFPSAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	if (IsRInputPressed())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Pressed R"));
 		IsReload = true;
 	}
 	else 

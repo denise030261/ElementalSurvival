@@ -64,11 +64,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		bool IsShoot = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		int32 CurWeapon;
+
 	UFUNCTION(BlueprintCallable, Category = "Character")
 		virtual void EquipWeapon(const int32 Index);
-
-	UPROPERTY(EditAnywhere, Category="Camera")
-	TSubclassOf<class UCameraShakeBase> ShootCameraShakeClass;
 
 protected:
 	UFUNCTION()

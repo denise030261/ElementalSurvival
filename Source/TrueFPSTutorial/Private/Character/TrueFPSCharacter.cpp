@@ -29,6 +29,7 @@ ATrueFPSCharacter::ATrueFPSCharacter()
 	Camera->SetupAttachment(GetMesh(), FName("head"));
 
 	FireEnd = false;
+	IsShoot = false;
 }
 
 void ATrueFPSCharacter::BeginPlay()
@@ -159,6 +160,11 @@ void ATrueFPSCharacter::Tick(const float DeltaTime)
 			FireEnd = false;
 		}
 	}
+
+	if (CurrentWeapon)
+	{
+		CurWeapon = CurrentWeapon->GunKind;
+	}
 }
 
 void ATrueFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -201,6 +207,8 @@ void ATrueFPSCharacter::EquipWeapon(const int32 Index)
 	{
 		Server_SetCurrentWeapon(Weapons[Index]);
 	}
+
+	CurrentWeapon->RemainingTime = 0;
 }
 
 void ATrueFPSCharacter::Server_SetCurrentWeapon_Implementation(AWeapon* NewWeapon)
@@ -334,10 +342,11 @@ void ATrueFPSCharacter::Running()
 void ATrueFPSCharacter::StartShooting()
 {
 	ReboundMovement = 0;
-	if (CurrentWeapon->bShoot)
+	if (CurrentWeapon->CurrentBullet > 0 && !CurrentWeapon->IsWeaponDelay)
 	{
+		IsShoot = true;
 		FireEnd = false;
-		CurrentWeapon->StartShooting();
+		CurrentWeapon->Shooting();
 		UE_LOG(LogTemp, Log, TEXT("%f"), GetControlRotation().Pitch);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ATrueFPSCharacter::CameraShake, CurrentWeapon->ShootDelay, true);
 	}
@@ -346,6 +355,7 @@ void ATrueFPSCharacter::StartShooting()
 
 void ATrueFPSCharacter::StopShooting()
 {
+	IsShoot = false;
 	CurrentPitch = GetControlRotation().Pitch;
 	CurrentWeapon->StopShooting();
 	GetWorld()->GetTimerManager().PauseTimer(TimerHandle);
@@ -361,11 +371,14 @@ void ATrueFPSCharacter::StopShooting()
 
 void ATrueFPSCharacter::CameraShake()
 {
-	if (ShootCameraShakeClass && CurrentWeapon->CurrentBullet > 0)
+	if (CurrentWeapon->CurrentBullet > 0)
 	{
-		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(ShootCameraShakeClass);
 		AddControllerPitchInput(-CurrentWeapon->Rebound);
 		ReboundMovement += CurrentWeapon->Rebound;
+	}
+	else 
+	{
+		StopShooting();
 	}
 }
 
