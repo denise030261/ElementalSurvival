@@ -82,6 +82,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shoot")
 	bool bShoot; // 총을 쏠 수 있는지
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shoot")
+	float ReloadTime; // 총을 쏠 수 있는지
+
 	UPROPERTY()
 	bool IsWeaponDelay; // 사격 딜레이의 시간인지 
 
@@ -104,6 +107,9 @@ public:
 		void Reloading(); // 재장전
 
 	UFUNCTION()
+		void ReloadDone(); // 재장전 완료
+
+	UFUNCTION()
 		void TraceTarget(); //타켓이 있으면 소리 발생
 
 	UFUNCTION()
@@ -116,4 +122,5 @@ public:
 
 private:
 	FTimerHandle TimerHandle; // 딜레이를 위한 변수
+	FTimerHandle ReloadTimerHandle; // 재장전 딜레이를 위한 변수
 };

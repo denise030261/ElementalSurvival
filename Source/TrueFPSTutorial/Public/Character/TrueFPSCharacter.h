@@ -126,6 +126,8 @@ protected:
 	void CameraShake();
 
 private:
+	UPROPERTY()
+		bool IsAim;
 	bool FireEnd; // 총을 다 쐈는지
 	float ReboundMovement = 0; // 얼마나 반동이 있었는지
 	float CurrentPitch; // 총 다 쐈을 때 Pitch 위치

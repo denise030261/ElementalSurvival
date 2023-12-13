@@ -30,6 +30,7 @@ ATrueFPSCharacter::ATrueFPSCharacter()
 
 	FireEnd = false;
 	IsShoot = false;
+	IsAim = false;
 }
 
 void ATrueFPSCharacter::BeginPlay()
@@ -147,7 +148,7 @@ void ATrueFPSCharacter::Tick(const float DeltaTime)
 	if (FireEnd)
 	{
 		GetController()->SetControlRotation(FRotator(
-			FMath::FInterpTo(GetControlRotation().Pitch, CurrentPitch - ReboundMovement, DeltaTime, 1),
+			FMath::FInterpTo(GetControlRotation().Pitch, CurrentPitch - ReboundMovement, DeltaTime, 3),
 			GetControlRotation().Yaw,
 			GetControlRotation().Roll));
 
@@ -220,6 +221,8 @@ void ATrueFPSCharacter::Server_SetCurrentWeapon_Implementation(AWeapon* NewWeapo
 
 void ATrueFPSCharacter::StartAiming()
 {
+	IsAim = true;
+
 	if(IsLocallyControlled() || HasAuthority())
 	{
 		Multi_Aim_Implementation(true); // Aiming을 하도록 허용
@@ -233,6 +236,8 @@ void ATrueFPSCharacter::StartAiming()
 
 void ATrueFPSCharacter::ReverseAiming()
 {
+	IsAim = false;
+
 	if(IsLocallyControlled() || HasAuthority())
 	{
 		Multi_Aim_Implementation(false); // Aiming을 하지 않도록 허용
@@ -350,7 +355,24 @@ void ATrueFPSCharacter::StartShooting()
 		UE_LOG(LogTemp, Log, TEXT("%f"), GetControlRotation().Pitch);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ATrueFPSCharacter::CameraShake, CurrentWeapon->ShootDelay, true);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentWeapon->CurrentBullet);
+		if (!CurrentWeapon->IsWeaponDelay)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Delay end"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Delaying"));
+		}
+	}
 	// 총 다 쐈을 때의 행동은 추후에 결정
+
+	if (IsAim && CurrentWeapon->GunKind==3)
+	{
+		ReverseAiming();
+	} // 에임 상태에서 칼을 찌르면 에임이 풀림
 }
 
 void ATrueFPSCharacter::StopShooting()

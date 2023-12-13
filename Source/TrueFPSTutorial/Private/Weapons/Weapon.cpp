@@ -48,23 +48,25 @@ void AWeapon::Shooting()
 {
 	if (bShoot && !IsWeaponDelay)
 	{
-		CurrentBullet--;
-		UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentBullet);
-
-		if (FireAnimation)
+		if (GunKind != 3)
 		{
-			Mesh->PlayAnimation(FireAnimation, false);
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AWeapon::Shooting, ShootDelay, true);
+			CurrentBullet--;
+			UE_LOG(LogTemp, Log, TEXT("Current Bullet : %d"), CurrentBullet);
+
+			if (FireAnimation)
+			{
+				Mesh->PlayAnimation(FireAnimation, false);
+				GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AWeapon::Shooting, ShootDelay, true);
+			}
 		}
 
 		TraceTarget();
 	}
-
 }
 
 void AWeapon::StopShooting()
 {
-	if (!IsWeaponDelay)
+	if (!IsWeaponDelay && GunKind != 3)
 	{
 		IsWeaponDelay = true;
 		if (FireAnimation)
@@ -80,13 +82,20 @@ void AWeapon::StopShooting()
 
 void AWeapon::Delaying()
 {
+	UE_LOG(LogTemp, Log, TEXT("Weapon : Delay end"));
 	IsWeaponDelay = false;
 }
 
 void AWeapon::Reloading()
 {
-	CurrentBullet = MaxBullet;
 	Mesh->PlayAnimation(ReloadGunAnim, false);
+	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &AWeapon::ReloadDone, ReloadTime, false);
+}
+
+void AWeapon::ReloadDone()
+{
+	CurrentBullet = MaxBullet;
+	IsWeaponDelay = false;
 }
 
 void AWeapon::TraceTarget()
