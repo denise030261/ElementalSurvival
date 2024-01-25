@@ -88,6 +88,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Anim")
 	float ADSWeight=0.f; // 서버에 보내는 변수
 
+	UPROPERTY(EditAnywhere, Category = "Widget")
+		TSubclassOf<UUserWidget> ZoomWidgetClass; // 스나이퍼 줌 UI 클래스
+	UPROPERTY()
+		UUserWidget* ZoomWidget; // // 스나이퍼 줌 UI
+
+	UPROPERTY(EditAnywhere, Category = "Widget")
+		TSubclassOf<UUserWidget> CharacterWidgetClass; // 스나이퍼 줌 UI 클래스
+	UPROPERTY()
+		UUserWidget* CharacterWidget; // // 스나이퍼 줌 UI
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Configurations|Anim")
 	class UCurveFloat* AimingCurve; // Aiming하는 거리

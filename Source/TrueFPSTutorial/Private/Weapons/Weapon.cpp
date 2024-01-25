@@ -3,6 +3,8 @@
 
 #include "Weapons/Weapon.h"
 #include <Kismet/GameplayStatics.h>
+#include "Camera/CameraComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -130,6 +132,7 @@ bool AWeapon::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	ShotDirection = -Rotation.Vector();
 
 	FVector End = Location + Rotation.Vector() * MaxRange;
+	DrawDebugSphere(GetWorld(), End, 50, 32, FColor::Red, false, 5.0f); // ÃÑ ¹ß»ç °Å¸®
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
