@@ -33,6 +33,7 @@ ATrueFPSCharacter::ATrueFPSCharacter()
 	FireEnd = false;
 	IsShoot = false;
 	IsAim = false;
+	CurrentHP = MaxHP;
 }
 
 void ATrueFPSCharacter::BeginPlay()
@@ -221,6 +222,11 @@ void ATrueFPSCharacter::EquipWeapon(const int32 Index)
 	}
 
 	CurrentWeapon->RemainingTime = 0;
+}
+
+float ATrueFPSCharacter::GetHealthPercent() const
+{
+	return CurrentHP / MaxHP;
 }
 
 void ATrueFPSCharacter::Server_SetCurrentWeapon_Implementation(AWeapon* NewWeapon)

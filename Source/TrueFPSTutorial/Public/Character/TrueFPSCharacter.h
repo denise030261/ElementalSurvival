@@ -65,6 +65,15 @@ public:
 		bool IsShoot = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	float MaxHP = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	float CurrentHP = 100;
+
+	UFUNCTION(BlueprintPure)
+	float GetHealthPercent() const;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		int32 CurWeapon;
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
