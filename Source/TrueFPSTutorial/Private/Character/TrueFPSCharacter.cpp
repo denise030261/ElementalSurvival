@@ -240,9 +240,6 @@ void ATrueFPSCharacter::StartAiming()
 {
 	IsAim = true;
 
-	if(CharacterWidget)
-		CharacterWidget->RemoveFromParent();
-
 	if(IsLocallyControlled() || HasAuthority())
 	{
 		Multi_Aim_Implementation(true); // Aiming을 하도록 허용
@@ -257,9 +254,6 @@ void ATrueFPSCharacter::StartAiming()
 void ATrueFPSCharacter::ReverseAiming()
 {
 	IsAim = false;
-
-	if (CharacterWidget)
-		CharacterWidget->AddToViewport();
 
 	if(IsLocallyControlled() || HasAuthority())
 	{
@@ -279,14 +273,6 @@ void ATrueFPSCharacter::Multi_Aim_Implementation(const bool bForward)
 		if (CurrentWeapon->GunKind == 4)
 		{
 			Camera->SetFieldOfView(15); 
-			if (ZoomWidgetClass)
-			{
-				ZoomWidget = CreateWidget(GetWorld(), ZoomWidgetClass);
-				if (ZoomWidget)
-				{
-					ZoomWidget->AddToViewport();
-				}
-			}
 		} // 스나이퍼 줌인
 		else
 		{
@@ -298,10 +284,6 @@ void ATrueFPSCharacter::Multi_Aim_Implementation(const bool bForward)
 		if (CurrentWeapon->GunKind == 4)
 		{
 			Camera->SetFieldOfView(90);
-			if (ZoomWidget)
-			{
-				ZoomWidget->RemoveFromViewport();
-			}
 		} // 스나이퍼 줌 아웃
 		else
 		{

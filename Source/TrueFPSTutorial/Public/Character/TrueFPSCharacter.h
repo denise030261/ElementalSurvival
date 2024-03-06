@@ -79,6 +79,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character")
 		virtual void EquipWeapon(const int32 Index);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+		bool IsAim;
+
 protected:
 	UFUNCTION()
 		virtual void OnRep_CurrentWeapon(const class AWeapon* OldWeapon);
@@ -96,11 +99,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Anim")
 	float ADSWeight=0.f; // 서버에 보내는 변수
-
-	UPROPERTY(EditAnywhere, Category = "Widget")
-		TSubclassOf<UUserWidget> ZoomWidgetClass; // 스나이퍼 줌 UI 클래스
-	UPROPERTY()
-		UUserWidget* ZoomWidget; // // 스나이퍼 줌 UI
 
 	UPROPERTY(EditAnywhere, Category = "Widget")
 		TSubclassOf<UUserWidget> CharacterWidgetClass; // 스나이퍼 줌 UI 클래스
@@ -145,8 +143,6 @@ protected:
 	void CameraShake();
 
 private:
-	UPROPERTY()
-		bool IsAim;
 	bool FireEnd; // 총을 다 쐈는지
 	float ReboundMovement = 0; // 얼마나 반동이 있었는지
 	float CurrentPitch; // 총 다 쐈을 때 Pitch 위치
